@@ -27,9 +27,6 @@ public class VistaConsola implements ObservadorJuego {
         System.out.println("====================================================");
         System.out.println("         BIENVENIDO A SERPIENTES Y ESCALERAS        ");
         System.out.println("====================================================");
-        System.out.println("Reglas: Mínimo 2 jugadores, máximo 4 jugadores.");
-        System.out.println("Meta: Casilla 100 exacta (si te pasás, rebotás).");
-        System.out.println("Sacar 6 da turno extra (3 seis seguidos anulan turno).\n");
     }
 
     /**

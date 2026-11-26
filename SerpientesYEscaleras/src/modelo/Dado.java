@@ -11,30 +11,14 @@ import java.util.Random;
  */
 public class Dado {
 
-    private final int caras;
+    private static final int CARAS = 6;
     private final Random random;
 
-    // Constructor por defecto: crea un dado clásico de 6 caras
     public Dado() {
-        // Reutiliza el constructor parametrizado con this(6) para no duplicar código
-        this(6);
-    }
-
-    // Constructor sobrecargado: permite instanciar dados de distinta cantidad de caras
-    public Dado(int caras) {
-        if (caras < 2) {
-            throw new IllegalArgumentException("El dado debe tener al menos 2 caras.");
-        }
-        this.caras = caras;
         this.random = new Random();
     }
 
-    /**
-     * QUÉ HACE: Devuelve un número entero aleatorio entre 1 y la cantidad de caras (inclusive).
-     * POR QUÉ SE HACE: nextInt(caras) genera valores de 0 a (caras - 1), por lo que sumar 1
-     * ajusta el rango exacto al de un dado físico [1..6].
-     */
     public int lanzar() {
-        return random.nextInt(caras) + 1;
+        return random.nextInt(CARAS) + 1;
     }
 }
