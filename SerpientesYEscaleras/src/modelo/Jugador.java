@@ -1,16 +1,10 @@
 package modelo;
 
-/**
- * QUÉ HACE: Representa a cada participante de la partida, guardando su nombre y su posición actual.
- *
- * POR QUÉ SE HACE: Mantiene el estado individual de cada jugador encapsulado. Inicia en
- * la posición 0 (fuera del tablero) para que, al sacar un 1 en el primer tiro, avance a
- * la casilla 1, tal como establecen las reglas originales del juego de mesa.
- */
 public class Jugador {
 
     private final String nombre;
     private int posicion;
+    private boolean bloqueadoPorSeises;
 
     public Jugador(String nombre) {
         if (nombre == null || nombre.trim().isEmpty()) {
@@ -22,14 +16,25 @@ public class Jugador {
     }
 
     public String getNombre() {
+
         return nombre;
     }
 
     public int getPosicion() {
+
         return posicion;
     }
 
     public void setPosicion(int posicion) {
+
         this.posicion = posicion;
+    }
+
+    public boolean isBloqueadoPorSeises() {
+        return bloqueadoPorSeises;
+    }
+
+    public void setBloqueadoPorSeises(boolean bloqueadoPorSeises) {
+        this.bloqueadoPorSeises = bloqueadoPorSeises;
     }
 }

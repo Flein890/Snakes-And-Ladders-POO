@@ -4,13 +4,12 @@ import java.util.List;
 import modelo.Jugador;
 
 /**
- * QUÉ HACE: Define el contrato (interfaz) que debe implementar cualquier clase que
+ * Define el contrato (interfaz) que debe implementar cualquier clase que
  * desee recibir notificaciones cuando cambie el estado del juego.
  *
- * POR QUÉ SE HACE:
- * 1. Desacoplamiento MVC: El Modelo (Juego) solo conoce esta interfaz, nunca conoce a
- *    VistaConsola. Así podrías cambiar la consola por una interfaz gráfica Swing o JavaFX
- *    sin modificar ni una línea del Modelo.
+ *   El Modelo (Juego) solo conoce esta interfaz, nunca conoce a
+ *   VistaConsola. Así podrías cambiar la consola por una interfaz gráfica Swing o JavaFX
+ *   sin modificar ni una línea del Modelo.
  */
 public interface ObservadorJuego {
 

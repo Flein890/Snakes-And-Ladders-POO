@@ -2,10 +2,11 @@ package modelo;
 
 import java.util.Random;
 
+//un dado tradicional para este juego debe tener 6 caras.
 
 public class Dado {
 
-    private static final int CARAS = 6;
+    private static final int CARAS = 6; //es static por si alguna clase necesitara saber cuantas caras tiene un dado
     private final Random random;
 
     public Dado() {

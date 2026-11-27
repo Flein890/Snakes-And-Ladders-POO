@@ -1,153 +1,168 @@
 @startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+
 class JuegoException {
-  +JuegoException(mensaje: String)
+  + JuegoException(mensaje: String)
 }
 
 class CantidadJugadoresInvalidaException {
-  +CantidadJugadoresInvalidaException(mensaje: String)
+  + CantidadJugadoresInvalidaException(mensaje: String)
 }
 
 class JuegoFinalizadoException {
-  +JuegoFinalizadoException(mensaje: String)
+  + JuegoFinalizadoException(mensaje: String)
 }
 
-JuegoException <|-- CantidadJugadoresInvalidaException
-JuegoException <|-- JuegoFinalizadoException
-
 interface ObservadorJuego {
-  +onJugadorAgregado(jugador: Jugador, totalActual: int): void
-  +onJuegoIniciado(jugadores: List<Jugador>): void
-  +onEventoTurno(descripcionEvento: String): void
-  +onEstadoActualizado(jugadores: List<Jugador>): void
-  +onJuegoFinalizado(ganador: Jugador): void
+  + onJugadorAgregado(jugador: Jugador, totalActual: int): void
+  + onJuegoIniciado(jugadores: List<Jugador>): void
+  + onEventoTurno(descripcionEvento: String): void
+  + onEstadoActualizado(jugadores: List<Jugador>): void
+  + onJuegoFinalizado(ganador: Jugador): void
 }
 
 class Casilla {
-  -numero: int
-  -destino: int
-  +Casilla(numero: int)
-  +getNumero(): int
-  +getDestino(): int
-  +setDestino(destino: int): void
-  +tieneEfecto(): boolean
+  - numero: int
+  - destino: int
+  + Casilla(numero: int)
+  + getNumero(): int
+  + getDestino(): int
+  + setDestino(destino: int): void
+  + tieneEfecto(): boolean
 }
 
-  class Dado {
-    - {static} CARAS : int = 6
-    - random : Random
-    + Dado()
-    + lanzar() : int
-  }
-
+class Dado {
+  - {static} CARAS : int = 6
+  - random : Random
+  + Dado()
+  + lanzar() : int
+}
 
 class Jugador {
-  -nombre: String
-  -posicion: int
-  +Jugador(nombre: String)
-  +getNombre(): String
-  +getPosicion(): int
-  +setPosicion(posicion: int): void
+  - nombre: String
+  - posicion: int
+  + Jugador(nombre: String)
+  + getNombre(): String
+  + getPosicion(): int
+  + setPosicion(posicion: int): void
 }
 
 class Turno {
-  -jugadorActual: Jugador
-  -indiceJugador: int
-  -seisesConsecutivos: int
-  -posicionInicial: int
-  +Turno(jugadorInicial: Jugador, indiceJugador: int)
-  +getJugadorActual(): Jugador
-  +getPosicionInicial(): int
-  +registrarTiro(valorDado: int): void
-  +superoLimiteSeises(): boolean
-  +tieneTiroExtra(): boolean
-  +avanzar(jugadores: List<Jugador>): void
+  - jugadorActual: Jugador
+  - indiceJugador: int
+  - seisesConsecutivos: int
+  - posicionInicial: int
+  + Turno(jugadorInicial: Jugador, indiceJugador: int)
+  + getJugadorActual(): Jugador
+  + getPosicionInicial(): int
+  + registrarTiro(valorDado: int): void
+  + superoLimiteSeises(): boolean
+  + tieneTiroExtra(): boolean
+  + avanzar(jugadores: List<Jugador>): void
 }
 
 class Tablero {
-  +{static}TAMANO_DEFAULT: int
-  -casillas: Casilla[]
-  +Tablero()
-  -configurarSerpientesYEscaleras(): void
-  +agregarConexion(origen: int, destino: int): void
-  +getCasilla(numero: int): Casilla
-  +getTamano(): int
+  + {static} TAMANO_64 : int = 64
+  + {static} TAMANO_100 : int = 100
+  + {static} TAMANO_144 : int = 144
+  + {static} TAMANO_DEFAULT : int = 100
+  - tamano: int
+  - casillas: Casilla[]
+  + Tablero()
+  + Tablero(tamano: int)
+  - validarTamano(tamano: int): void
+  - configurarSerpientesYEscaleras(): void
+  + agregarConexion(origen: int, destino: int): void
+  + getCasilla(numero: int): Casilla
+  + getTamano(): int
 }
 
 class Juego {
-  +{static}MIN_JUGADORES: int
-  +{static}MAX_JUGADORES: int
-  -tablero: Tablero
-  -dado: Dado
-  -jugadores: List<Jugador>
-  -observadores: List<ObservadorJuego>
-  -turno: Turno
-  -iniciado: boolean
-  -finalizado: boolean
-  -ganador: Jugador
-  +Juego()
-  +agregarObservador(observador: ObservadorJuego): void
-  +eliminarObservador(observador: ObservadorJuego): void
-  +validarCantidadJugadores(cantidad: int): void
-  +agregarJugador(nombre: String): void
-  +iniciar(): void
-  +jugarTurno(): void
-  -procesarMovimiento(j: Jugador, tiro: int): void
-  +getJugadorActual(): Jugador
-  +isFinalizado(): boolean
-  +getGanador(): Jugador
-  -notificarJugadorAgregado(jugador: Jugador): void
-  -notificarJuegoIniciado(): void
-  -notificarEvento(mensaje: String): void
-  -notificarEstadoActualizado(): void
-  -notificarJuegoFinalizado(ganador: Jugador): void
+  + {static} MIN_JUGADORES : int = 2
+  + {static} MAX_JUGADORES : int = 4
+  - tablero: Tablero
+  - dado: Dado
+  - jugadores: List<Jugador>
+  - observadores: List<ObservadorJuego>
+  - turno: Turno
+  - iniciado: boolean
+  - finalizado: boolean
+  - ganador: Jugador
+  + Juego()
+  + Juego(tamanoTablero: int)
+  + agregarObservador(observador: ObservadorJuego): void
+  + eliminarObservador(observador: ObservadorJuego): void
+  + validarCantidadJugadores(cantidad: int): void
+  + agregarJugador(nombre: String): void
+  + iniciar(): void
+  + jugarTurno(): void
+  - procesarMovimiento(j: Jugador, tiro: int): void
+  + getTamanoTablero(): int
+  + getJugadorActual(): Jugador
+  + isFinalizado(): boolean
+  + getGanador(): Jugador
+  - notificarJugadorAgregado(jugador: Jugador): void
+  - notificarJuegoIniciado(): void
+  - notificarEvento(mensaje: String): void
+  - notificarEstadoActualizado(): void
+  - notificarJuegoFinalizado(ganador: Jugador): void
 }
-
-Tablero "1" --> "*" Casilla : casillas
-Tablero ..> Casilla : <<create>>
-Turno "1" --> "1" Jugador : jugadorActual
-Juego "1" --> "1" Tablero : tablero
-Juego "1" --> "1" Dado : dado
-Juego "1" --> "*" Jugador : jugadores
-Juego "1" --> "*" ObservadorJuego : observadores
-Juego "1" --> "1" Turno : turno
-Juego ..> Turno : <<create>>
-Juego ..> JuegoException : throws
 
 class VistaConsola {
-  -scanner: Scanner
-  +VistaConsola()
-  +mostrarBienvenida(): void
-  +pedirCantidadJugadores(): int
-  +pedirNombreJugador(numeroJugador: int): String
-  +esperarEnterParaTirar(nombreJugador: String): void
-  +mostrarError(mensajeError: String): void
-  +onJugadorAgregado(jugador: Jugador, totalActual: int): void
-  +onJuegoIniciado(jugadores: List<Jugador>): void
-  +onEventoTurno(descripcionEvento: String): void
-  +onEstadoActualizado(jugadores: List<Jugador>): void
-  +onJuegoFinalizado(ganador: Jugador): void
+  - scanner: Scanner
+  + VistaConsola()
+  + mostrarBienvenida(): void
+  + pedirTamanoTablero(): int
+  + pedirCantidadJugadores(): int
+  + pedirNombreJugador(numeroJugador: int): String
+  + esperarEnterParaTirar(nombreJugador: String): void
+  + mostrarError(mensajeError: String): void
+  + onJugadorAgregado(jugador: Jugador, totalActual: int): void
+  + onJuegoIniciado(jugadores: List<Jugador>): void
+  + onEventoTurno(descripcionEvento: String): void
+  + onEstadoActualizado(jugadores: List<Jugador>): void
+  + onJuegoFinalizado(ganador: Jugador): void
 }
-
-ObservadorJuego <|.. VistaConsola : implementa
 
 class ControladorJuego {
-  -modelo: Juego
-  -vista: VistaConsola
-  +ControladorJuego(modelo: Juego, vista: VistaConsola)
-  +ejecutar(): void
-  -configurarJugadores(): void
-  -buclePrincipalDeJuego(): void
+  - modelo: Juego
+  - vista: VistaConsola
+  + ControladorJuego(modelo: Juego, vista: VistaConsola)
+  + ejecutar(): void
+  - configurarJugadores(): void
+  - buclePrincipalDeJuego(): void
 }
 
+class Main {
+  + {static} main(args: String[]): void
+}
+
+' Herencia e implementación
+JuegoException <|-- CantidadJugadoresInvalidaException
+JuegoException <|-- JuegoFinalizadoException
+ObservadorJuego <|.. VistaConsola : implementa
+
+' Dependencias (<<create>> y throws)
+Main ..> VistaConsola : <<create>>
+Main ..> Juego : <<create>>
+Main ..> ControladorJuego : <<create>>
+Juego ..> Tablero : <<create>>
+Juego ..> Turno : <<create>>
+Juego ..> JuegoException : throws
+Tablero ..> Casilla : <<create>>
+
+' Asociaciones dirigidas con multiplicidad y nombre de rol
 ControladorJuego "1" --> "1" Juego : modelo
 ControladorJuego "1" --> "1" VistaConsola : vista
-class Main {
-  +main(args: String[]): void
-}
 
-Main ..> Juego : <<create>>
-Main ..> VistaConsola : <<create>>
-Main ..> ControladorJuego : <<create>>
+Juego "1" --> "1" Dado : dado
+Juego "1" --> "1" Turno : turno
+Juego "1" --> "1" Tablero : tablero
+Juego "1" --> "*" Jugador : jugadores
+Juego "1" --> "*" ObservadorJuego : observadores
 
-
+Turno "1" --> "1" Jugador : jugadorActual
+Tablero "1" --> "*" Casilla : casillas
 @enduml

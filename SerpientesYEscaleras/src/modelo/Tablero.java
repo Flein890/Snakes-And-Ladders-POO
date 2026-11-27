@@ -131,7 +131,7 @@ public class Tablero {
                     "El destino " + destino + " no es válido para un tablero de " + tamano + " casillas."
             );
         }
-        getCasilla(origen).setDestino(destino);
+        getCasilla(origen).setDestino(destino); //le aplico la conexion a la casilla en particular
     }
 
     public Casilla getCasilla(int numero) {

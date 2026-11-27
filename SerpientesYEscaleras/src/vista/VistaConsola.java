@@ -66,7 +66,7 @@ public class VistaConsola implements ObservadorJuego {
     }
 
     public void esperarEnterParaTirar(String nombreJugador) {
-        System.out.print("\nTurno de " + nombreJugador + ". Presioná ENTER para lanzar el dado...");
+        System.out.print("\nTurno de " + nombreJugador + ". Presioná ENTER para lanzar el dado...\n");
         scanner.nextLine();
     }
 

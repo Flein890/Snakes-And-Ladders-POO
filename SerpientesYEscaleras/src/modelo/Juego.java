@@ -11,7 +11,6 @@ import modelo.observer.ObservadorJuego;
 
 public class Juego {
 
-    // Límites del dominio que el controlador consulta/respeta al validar o pedir cantidad de jugadores
     public static final int MIN_JUGADORES = 2;
     public static final int MAX_JUGADORES = 4;
 
@@ -20,7 +19,6 @@ public class Juego {
     private final Dado dado;
     private final List<Jugador> jugadores;
 
-    // Lista de observadores notificados automáticamente; el controlador no reenvía notificaciones a mano
     private final List<ObservadorJuego> observadores;
 
     // Estado del turno y ciclo de vida de la partida consultado por el controlador (ej. getJugadorActual(), isFinalizado())
@@ -31,48 +29,37 @@ public class Juego {
 
 
     public Juego() {
-        this(Tablero.TAMANO_DEFAULT);
+        this(Tablero.TAMANO_DEFAULT); //llamo al otro constructor pasandole el tamaño
     }
 
     public Juego(int tamanoTablero) {
-        // Crea el tablero con el tamaño elegido; si es inválido, lanza excepción hacia quien lo invocó
         this.tablero = new Tablero(tamanoTablero);
         this.dado = new Dado();
         this.jugadores = new ArrayList<>();
-        // Inicializa la lista de observadores a notificar cuando cambie el estado
         this.observadores = new ArrayList<>();
-        // Aún no hay turno activo hasta que el controlador llame a iniciar()
-        this.turno = null;
-        // La partida arranca sin iniciar
+        this.turno = null; // Aún no hay turno activo hasta que el controlador llame a iniciar()
         this.iniciado = false;
-        // La partida arranca sin finalizar
         this.finalizado = false;
         this.ganador = null;
     }
 
     // --- GESTIÓN DE OBSERVADORES (PATRÓN OBSERVER) ---
 
-    // Permite suscribir observadores (ej. VistaConsola) sin que el controlador tenga que tocar el modelo
     public void agregarObservador(ObservadorJuego observador) {
-        // Evita nulos y duplicados dentro de la lista de observadores
         if (observador != null && !observadores.contains(observador)) {
-            // Registra el observador para recibir futuras notificaciones de Juego
             observadores.add(observador);
         }
     }
 
-    // Permite desuscribir un observador si el controlador o el flujo lo necesitan
     public void eliminarObservador(ObservadorJuego observador) {
-        // Quita el observador de la lista para que deje de recibir avisos
         observadores.remove(observador);
     }
 
     // --- VALIDACIÓN Y CONFIGURACIÓN DE JUGADORES ---
 
-    // El controlador llama a este metodo para validar la cantidad ingresada por el usuario antes de registrar nombres
+
     public void validarCantidadJugadores(int cantidad) throws CantidadJugadoresInvalidaException {
         if (cantidad < MIN_JUGADORES || cantidad > MAX_JUGADORES) {
-            // Lanza excepción checked del dominio para que el controlador la capture, muestre el error y reintente
             throw new CantidadJugadoresInvalidaException(
                     "Cantidad inválida (" + cantidad + "). El juego requiere un mínimo de "
                             + MIN_JUGADORES + " y un máximo de " + MAX_JUGADORES + " jugadores."
@@ -86,19 +73,16 @@ public class Juego {
         if (iniciado) {
             throw new JuegoException("No se pueden agregar jugadores una vez iniciada la partida.");
         }
-        // Si se supera el cupo máximo, lanza CantidadJugadoresInvalidaException para que el controlador la maneje
+
         if (jugadores.size() >= MAX_JUGADORES) {
             throw new CantidadJugadoresInvalidaException(
                     "No se pueden agregar más jugadores. El máximo permitido es " + MAX_JUGADORES + "."
             );
         }
         try {
-            // Crea la entidad Jugador con el nombre recibido desde el controlador
             Jugador nuevo = new Jugador(nombre);
-            // Agrega el jugador a la partida
             jugadores.add(nuevo);
-            // Notifica a los observadores (ej. VistaConsola) que se agregó un jugador, sin intervención del controlador
-            notificarJugadorAgregado(nuevo);
+            notificarJugadorAgregado(nuevo); //notifica a los observadores que se agrego un jugador
         } catch (IllegalArgumentException e) {
             throw new JuegoException(e.getMessage());
         }
@@ -106,84 +90,80 @@ public class Juego {
 
 
     public void iniciar() throws CantidadJugadoresInvalidaException {
-        // Revalida que haya entre 2 y 4 jugadores antes de arrancar (protege aunque no se haya llamado antes)
         validarCantidadJugadores(jugadores.size());
-        // Crea el primer turno apuntando al jugador en el índice 0
-        this.turno = new Turno(jugadores.get(0), 0);
-        // Marca la partida como iniciada para habilitar jugarTurno()
+        this.turno = new Turno(jugadores.get(0), 0); // Crea el primer turno apuntando al jugador en el índice 0
         this.iniciado = true;
-        // Avisa a los observadores que la partida comenzó; el controlador no imprime esto directamente
-        notificarJuegoIniciado();
+        notificarJuegoIniciado();// Avisa a los observadores que la partida comenzó
     }
+
 
     // --- LÓGICA PRINCIPAL DE TURNOS Y REGLAS ORIGINALES ---
 
     // El controlador invoca jugarTurno() en cada iteración del bucle principal después de que el usuario presiona ENTER
     public void jugarTurno() throws JuegoException {
-        // Si el controlador llama a jugarTurno() antes de iniciar(), corta con JuegoException
         if (!iniciado) {
             throw new JuegoException("La partida aún no ha sido iniciada.");
         }
-        // Si la partida ya terminó, lanza JuegoFinalizadoException (subclase de JuegoException) al controlador
         if (finalizado) {
             throw new JuegoFinalizadoException("El juego ya finalizó. El ganador fue " + ganador.getNombre() + ".");
         }
 
-        // Obtiene el jugador al que le corresponde actuar según el Turno actual
         Jugador jugadorActual = turno.getJugadorActual();
-        // Lanza el dado y obtiene el valor del tiro
         int tiro = dado.lanzar();
 
-        // Notifica el evento del lanzamiento a los observadores; el controlador no arma este mensaje
         notificarEvento(jugadorActual.getNombre() + " (casilla " + jugadorActual.getPosicion()
                 + ") lanzó el dado y sacó: " + tiro);
 
-        // Registra el tiro en Turno para actualizar la racha de seises consecutivos
+        if (jugadorActual.isBloqueadoPorSeises()) {
+            if (tiro == 6) {
+                jugadorActual.setBloqueadoPorSeises(false);
+                notificarEvento("¡Sacó 6! " + jugadorActual.getNombre()
+                        + " se desbloquea y puede moverse.");
+            } else {
+                notificarEvento(jugadorActual.getNombre()
+                        + " sigue bloqueado (necesita sacar un 6 para moverse).");
+                turno.avanzar(jugadores);
+                notificarEstadoActualizado();
+                return;
+            }
+        }
+
         turno.registrarTiro(tiro);
 
-        // Evalúa si el jugador superó el límite de seises consecutivos
         if (turno.superoLimiteSeises()) {
-            // Recupera la posición donde empezó el turno este jugador
-            int posInicial = turno.getPosicionInicial();
-            // Devuelve al jugador a su posición inicial del turno
+            int posInicial = turno.getPosicionInicial(); // o 1 si dejaste posicionInicial en 1
             jugadorActual.setPosicion(posInicial);
-            // Informa por medio de los observadores la penalización por triple seis
+            jugadorActual.setBloqueadoPorSeises(true);
             notificarEvento("¡Tres 6 consecutivos! " + jugadorActual.getNombre()
-                    + " pierde su turno y regresa a la casilla " + posInicial + ".");
-            // Pasa el turno al siguiente jugador
+                    + " vuelve a la casilla " + posInicial
+                    + " y queda bloqueado hasta sacar otro 6.");
             turno.avanzar(jugadores);
-            // Notifica a los observadores las posiciones actualizadas
             notificarEstadoActualizado();
-            // Termina el turno anticipadamente; el controlador seguirá su bucle consultando modelo.isFinalizado()
             return;
         }
 
-        // Aplica el desplazamiento, rebote, serpientes/escaleras y chequeo de victoria
         procesarMovimiento(jugadorActual, tiro);
-        // Notifica a los observadores el estado actualizado tras moverse
         notificarEstadoActualizado();
 
-        // Si alguien ganó en este movimiento
         if (finalizado) {
-            // Notifica a los observadores quién ganó; luego el controlador verá isFinalizado() == true y saldrá del bucle
             notificarJuegoFinalizado(ganador);
             return;
         }
 
-        // Si el jugador no ganó y tiene tiro extra por sacar 6, mantiene el mismo turno para la próxima llamada del controlador
         if (turno.tieneTiroExtra()) {
             notificarEvento("¡Sacó 6! " + jugadorActual.getNombre() + " obtiene un tiro extra.");
         } else {
-            // Si no tiene tiro extra, rota el turno al siguiente jugador para el próximo ciclo del controlador
             turno.avanzar(jugadores);
         }
     }
 
-    // Método interno de reglas del modelo: el controlador no lo llama directamente
+
+
+
     private void procesarMovimiento(Jugador j, int tiro) {
-        // Toma el tamaño del tablero (64, 100 o 144) como casilla meta
+
         int meta = tablero.getTamano(); // 64, 100 o 144 según el tablero elegido
-        // Calcula la posición tentativa sumando el tiro a la posición actual
+
         int posicionTentativa = j.getPosicion() + tiro;
 
         // Si se pasa de la casilla meta, aplica la regla de rebote hacia atrás
@@ -202,7 +182,6 @@ public class Juego {
         // Notifica el avance a los observadores
         notificarEvento(j.getNombre() + " avanza a la casilla " + posicionTentativa + ".");
 
-        // Si cayó exactamente en la meta, marca fin de partida y registra ganador
         if (posicionTentativa == meta) {
             this.finalizado = true;
             this.ganador = j;
@@ -274,9 +253,8 @@ public class Juego {
     }
 
     private void notificarEstadoActualizado() {
-        List<Jugador> listaSegura = Collections.unmodifiableList(jugadores);
         for (ObservadorJuego obs : observadores) {
-            obs.onEstadoActualizado(listaSegura);
+            obs.onEstadoActualizado(jugadores);
         }
     }
 
