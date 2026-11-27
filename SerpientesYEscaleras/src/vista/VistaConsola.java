@@ -22,7 +22,7 @@ public class VistaConsola implements ObservadorJuego {
 
     public void mostrarBienvenida() {
         System.out.println("==========================================");
-        System.out.println("      SERPIENTES Y ESCALERAS (JAVA)       ");
+        System.out.println("      SERPIENTES Y ESCALERAS              ");
         System.out.println("==========================================");
     }
 

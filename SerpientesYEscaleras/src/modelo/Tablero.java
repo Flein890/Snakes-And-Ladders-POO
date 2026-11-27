@@ -33,6 +33,9 @@ public class Tablero {
         configurarSerpientesYEscaleras();
     }
 
+
+
+
     private void validarTamano(int tamano) {
         if (tamano != TAMANO_64 && tamano != TAMANO_100 && tamano != TAMANO_144) {
             throw new IllegalArgumentException(

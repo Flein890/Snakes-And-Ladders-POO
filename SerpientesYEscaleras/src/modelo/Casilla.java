@@ -1,18 +1,16 @@
 package modelo;
 
 /**
- * QUÉ HACE: Representa cada uno de los 100 espacios del tablero, almacenando su número
- * y el número de casilla destino al que envía al jugador si cae en ella.
- *
- * POR QUÉ SE HACE: Encapsula tanto las casillas normales como las serpientes y escaleras
+ Encapsula tanto las casillas normales como las serpientes y escaleras
  * en una única abstracción cohesiva. Si numero == destino, es una casilla normal; si
  * destino > numero es una escalera; y si destino < numero es una serpiente.
  */
 public class Casilla {
 
     // Atributos privados para garantizar el encapsulamiento
-    private final int numero;
-    private int destino;
+    private final int numero;       //si numero == destino, es una casilla normal
+    private int destino;            //si destino > numero es una escalera; y si destino < numero es una serpiente.
+
 
     public Casilla(int numero) {
         this.numero = numero;
@@ -33,12 +31,8 @@ public class Casilla {
         this.destino = destino;
     }
 
-    /**
-     * QUÉ HACE: Indica si caer en esta casilla provoca un desplazamiento automático.
-     * POR QUÉ SE HACE: Evita que la clase Juego tenga que comparar números directamente,
-     * delegando la responsabilidad de saber si hay efecto a la propia Casilla (principio Expert).
-     */
+    //este metodo evita que el Juego tenga que comparar si la casilla tiene o no efecto
     public boolean tieneEfecto() {
-        return this.numero != this.destino;
+        return this.numero != this.destino; //si la casilla no apunta a si misma
     }
 }
