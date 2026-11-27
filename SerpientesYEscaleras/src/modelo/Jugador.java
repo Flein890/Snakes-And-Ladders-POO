@@ -17,8 +17,8 @@ public class Jugador {
             throw new IllegalArgumentException("El nombre del jugador no puede estar vacío.");
         }
         this.nombre = nombre.trim();
-        // Posición 0 representa la ficha fuera del tablero antes de entrar a la casilla 1
-        this.posicion = 0;
+        // Todos los jugadores comienzan en la casilla 1
+        this.posicion = 1;
     }
 
     public String getNombre() {

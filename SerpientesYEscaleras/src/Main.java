@@ -3,18 +3,22 @@ import modelo.Juego;
 import vista.VistaConsola;
 
 /**
- * QUÉ HACE: Punto de arranque de la aplicación Java. Instancia las tres capas de MVC
- * (Modelo, Vista y Controlador), las vincula e inicia la ejecución.
+ * QUÉ HACE: Punto de entrada de la aplicación. Solicita el tamaño del tablero,
+ * construye el modelo y la vista, los conecta mediante el patrón Observer e
+ * inicia el controlador.
  *
- * POR QUÉ SE HACE: Separa la creación e inyección de dependencias del funcionamiento
- * interno de cada capa, manteniendo el acoplamiento al mínimo.
- */
+ **/
 public class Main {
-    public static void main(String[] args) {
-        Juego modelo = new Juego();
-        VistaConsola vista = new VistaConsola();
-        ControladorJuego controlador = new ControladorJuego(modelo, vista);
 
+    public static void main(String[] args) {
+        VistaConsola vista = new VistaConsola();
+        vista.mostrarBienvenida();
+
+        int tamanoTablero = vista.pedirTamanoTablero();
+        Juego modelo = new Juego(tamanoTablero);
+        modelo.agregarObservador(vista);
+
+        ControladorJuego controlador = new ControladorJuego(modelo, vista);
         controlador.ejecutar();
     }
 }

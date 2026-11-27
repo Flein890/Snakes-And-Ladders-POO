@@ -9,13 +9,11 @@ import modelo.excepciones.JuegoFinalizadoException;
 import modelo.observer.ObservadorJuego;
 
 /**
- * QUÉ HACE: Coordina la partida completa de Serpientes y Escaleras, valida la cantidad
- * de jugadores (mínimo 2, máximo 4), delega el estado del turno actual a Turno y notifica
- * los cambios a los observadores registrados.
+ * QUÉ HACE: Coordina la partida de Serpientes y Escaleras sobre un tablero de
+ * 64, 100 o 144 casillas, gestiona el Turno y notifica a los observadores.
  *
- * POR QUÉ SE HACE: Mantiene el rol de Sujeto Observable del patrón Observer y orquesta
- * las entidades del Modelo sin cargar con los detalles internos de la racha de seises ni
- * del índice de turno, que ahora viven en Turno.
+ * POR QUÉ SE HACE: Permite crear partidas con el tamaño elegido al inicio sin
+ * acoplar el modelo a la consola ni duplicar lógica de movimiento.
  */
 public class Juego {
 
@@ -27,14 +25,17 @@ public class Juego {
     private final List<Jugador> jugadores;
     private final List<ObservadorJuego> observadores;
 
-    // Reemplaza a turnoActual, contadorSeis y posicionInicioRonda
     private Turno turno;
     private boolean iniciado;
     private boolean finalizado;
     private Jugador ganador;
 
     public Juego() {
-        this.tablero = new Tablero();
+        this(Tablero.TAMANO_DEFAULT);
+    }
+
+    public Juego(int tamanoTablero) {
+        this.tablero = new Tablero(tamanoTablero);
         this.dado = new Dado();
         this.jugadores = new ArrayList<>();
         this.observadores = new ArrayList<>();
@@ -85,13 +86,6 @@ public class Juego {
         }
     }
 
-    /**
-     * QUÉ HACE: Valida la cantidad de jugadores, instancia el primer Turno y marca la
-     * partida como iniciada.
-     *
-     * POR QUÉ SE HACE: Garantiza que el objeto Turno exista únicamente cuando ya hay al
-     * menos un jugador válido y la partida está lista para comenzar.
-     */
     public void iniciar() throws CantidadJugadoresInvalidaException {
         validarCantidadJugadores(jugadores.size());
         this.turno = new Turno(jugadores.get(0), 0);
@@ -101,13 +95,6 @@ public class Juego {
 
     // --- LÓGICA PRINCIPAL DE TURNOS Y REGLAS ORIGINALES ---
 
-    /**
-     * QUÉ HACE: Ejecuta un lanzamiento del dado para el jugador en turno, aplica las
-     * reglas originales y actualiza el Turno.
-     *
-     * POR QUÉ SE HACE: Delega a Turno el registro de la racha de 6, la comprobación del
-     * límite de 3 seises, la concesión de tiro extra y el avance circular al siguiente jugador.
-     */
     public void jugarTurno() throws JuegoException {
         if (!iniciado) {
             throw new JuegoException("La partida aún no ha sido iniciada.");
@@ -122,10 +109,8 @@ public class Juego {
         notificarEvento(jugadorActual.getNombre() + " (casilla " + jugadorActual.getPosicion()
                 + ") lanzó el dado y sacó: " + tiro);
 
-        // Registramos el tiro en Turno para actualizar la racha de seises consecutivos
         turno.registrarTiro(tiro);
 
-        // REGLA ORIGINAL 1: Tres 6 seguidos anulan el turno y devuelven a la posición inicial del turno
         if (turno.superoLimiteSeises()) {
             int posInicial = turno.getPosicionInicial();
             jugadorActual.setPosicion(posInicial);
@@ -136,7 +121,6 @@ public class Juego {
             return;
         }
 
-        // Procesamos avance, rebote exacto en 100 y efectos de serpientes o escaleras
         procesarMovimiento(jugadorActual, tiro);
         notificarEstadoActualizado();
 
@@ -145,7 +129,6 @@ public class Juego {
             return;
         }
 
-        // REGLA ORIGINAL 2: Sacar 6 (sin llegar a 3 seguidos) otorga un tiro extra inmediato
         if (turno.tieneTiroExtra()) {
             notificarEvento("¡Sacó 6! " + jugadorActual.getNombre() + " obtiene un tiro extra.");
         } else {
@@ -154,14 +137,13 @@ public class Juego {
     }
 
     private void procesarMovimiento(Jugador j, int tiro) {
-        int meta = tablero.getTamano(); // 100
+        int meta = tablero.getTamano(); // 64, 100 o 144 según el tablero elegido
         int posicionTentativa = j.getPosicion() + tiro;
 
-        // REGLA ORIGINAL 3: Para ganar se debe llegar exactamente a 100; si se pasa, rebota
         if (posicionTentativa > meta) {
             int exceso = posicionTentativa - meta;
             posicionTentativa = meta - exceso;
-            notificarEvento("Se pasó de 100 por " + exceso + " lugar(es). Rebota hasta la casilla "
+            notificarEvento("Se pasó de " + meta + " por " + exceso + " lugar(es). Rebota hasta la casilla "
                     + posicionTentativa + ".");
         }
 
@@ -174,7 +156,6 @@ public class Juego {
             return;
         }
 
-        // REGLA ORIGINAL 4: Verificar escalera (sube) o serpiente (baja)
         Casilla casillaActual = tablero.getCasilla(posicionTentativa);
         if (casillaActual.tieneEfecto()) {
             int destino = casillaActual.getDestino();
@@ -194,7 +175,11 @@ public class Juego {
         }
     }
 
-    // --- CONSULTAS DE ESTADO (GETTERS) ---
+    // --- CONSULTAS DE ESTADO ---
+
+    public int getTamanoTablero() {
+        return tablero.getTamano();
+    }
 
     public Jugador getJugadorActual() {
         return turno != null ? turno.getJugadorActual() : null;
