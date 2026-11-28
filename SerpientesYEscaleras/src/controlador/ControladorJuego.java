@@ -12,9 +12,7 @@ import vista.VistaConsola;
 
 public class ControladorJuego {
 
-    // Referencia inmutable al modelo (Juego); el controlador lo usa para ejecutar acciones y consultar estado
     private final Juego modelo;
-    // Referencia inmutable a la vista (VistaConsola); el controlador la usa para pedir datos y mostrar errores
     private final VistaConsola vista;
 
     public ControladorJuego(Juego modelo, VistaConsola vista) {

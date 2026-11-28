@@ -142,7 +142,7 @@ public class Juego {
             return;
         }
 
-        procesarMovimiento(jugadorActual, tiro);
+        procesarMovimiento(jugadorActual, tiro); //asignar la posicion al jugador y el efecto si es que tiene (escalera/serpiente)
         notificarEstadoActualizado();
 
         if (finalizado) {
